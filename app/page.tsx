@@ -1,13 +1,14 @@
 import Image from "next/image"
 import Header from "./_components/Header"
 import { Button } from "./_components/ui/button"
-import { Eye, EyeIcon, EyeOffIcon, FootprintsIcon, SearchIcon } from "lucide-react"
+import { SearchIcon } from "lucide-react"
 import { Input } from "./_components/ui/input"
 import { Card, CardContent } from "./_components/ui/card"
 import { Badge } from "./_components/ui/badge"
 import { Avatar, AvatarImage } from "./_components/ui/avatar"
 import { db } from "./_lib/prisma"
 import BarberShopItem from "./_components/BarberShopItem"
+import {quickSearchOptions} from "./_constants/search"
 
 const Home = async () => {
 
@@ -37,31 +38,20 @@ const Home = async () => {
 
           {/* BUSCA RAPIDA */}
            <div className="flex gap-3 mt-6 overflow-x-scroll [&::-webkit-scrollbar]:hidden">
+            {quickSearchOptions.map((option) => (
             <Button className="flex items-center gap-1 rounded-2xl" variant="secondary">
-              <Image src="/cabelo.svg" width={16} height={16} alt=""></Image>
-              <p className="font-semibold">Cabelo</p>
+              <Image src={option.imageUrl}
+                width={16} 
+                height={16}
+                alt={option.title}
+              />
+                {option.title}
             </Button>
+          ))}
 
-            <Button className="flex items-center gap-1 rounded-2xl" variant="secondary">
-              <Image src="/barba.svg" width={16} height={16} alt=""></Image>
-              <p className="font-semibold">Barba</p>
-            </Button> 
-
-            <Button className="flex items-center gap-1 rounded-2xl" variant="secondary">
-              <Image src="/acabamento.svg" width={16} height={16} alt=""></Image>
-              <p className="font-semibold">Acabamento</p>
-            </Button>
-
-            <Button className="flex items-center gap-1 rounded-2xl" variant="secondary">
-              <FootprintsIcon size={16}/>
-              <p className="font-semibold">Pezinho</p>
-            </Button>
-
-            <Button className="flex items-center gap-1 rounded-2xl" variant="secondary">
-              <EyeIcon size={16}/>
-              <p className="font-semibold">Sobrancelha</p>
-            </Button>
           </div>
+
+          
 
           {/* BANNER */}
           <div className="w-full relative h-[150px] mt-6">
@@ -69,6 +59,7 @@ const Home = async () => {
           </div>
 
           {/* AGENDAMENTO => Booking */}
+          {/* FAZER COMPONENTE DE AGENDAMENTO */}
           <h2 className="text-xs font-bold text-gray-400 mt-5">
             AGENDAMENTOS
           </h2>
