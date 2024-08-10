@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Header from "./_components/Header"
 import { Button } from "./_components/ui/button"
-import { SearchIcon } from "lucide-react"
+import { Eye, EyeIcon, EyeOffIcon, FootprintsIcon, SearchIcon } from "lucide-react"
 import { Input } from "./_components/ui/input"
 import { Card, CardContent } from "./_components/ui/card"
 import { Badge } from "./_components/ui/badge"
@@ -12,11 +12,16 @@ import BarberShopItem from "./_components/BarberShopItem"
 const Home = async () => {
 
   const barberShops = await db.barbershop.findMany({})
+  const barberShopPopular = await db.barbershop.findMany({
+    orderBy: {
+      name: "desc",
+    }
+  })
 
   return( 
     <div>
         <Header />
-        <div className="p-5">
+        <div className="p-5 pb-10">
 
           {/* TEXTO */}
           <h2 className="text-xl font-bold">Olá, Luiz</h2>
@@ -24,11 +29,40 @@ const Home = async () => {
 
           {/* INPUT E BUSCA */}
           <div className="mt-6 gap-2 flex items-center">
-            <Input />
+            <Input placeholder="Busque" />
             <Button className="rounded">
               <SearchIcon />
             </Button>
           </div>
+
+          {/* BUSCA RAPIDA */}
+           <div className="flex gap-3 mt-6 overflow-x-scroll [&::-webkit-scrollbar]:hidden">
+            <Button className="flex items-center gap-1 rounded-2xl" variant="secondary">
+              <Image src="/cabelo.svg" width={16} height={16} alt=""></Image>
+              <p className="font-semibold">Cabelo</p>
+            </Button>
+
+            <Button className="flex items-center gap-1 rounded-2xl" variant="secondary">
+              <Image src="/barba.svg" width={16} height={16} alt=""></Image>
+              <p className="font-semibold">Barba</p>
+            </Button> 
+
+            <Button className="flex items-center gap-1 rounded-2xl" variant="secondary">
+              <Image src="/acabamento.svg" width={16} height={16} alt=""></Image>
+              <p className="font-semibold">Acabamento</p>
+            </Button>
+
+            <Button className="flex items-center gap-1 rounded-2xl" variant="secondary">
+              <FootprintsIcon size={16}/>
+              <p className="font-semibold">Pezinho</p>
+            </Button>
+
+            <Button className="flex items-center gap-1 rounded-2xl" variant="secondary">
+              <EyeIcon size={16}/>
+              <p className="font-semibold">Sobrancelha</p>
+            </Button>
+          </div>
+
           {/* BANNER */}
           <div className="w-full relative h-[150px] mt-6">
               <Image src="/BannerAgende.png" fill className="object-cover rounded-xl" alt={"banner de agendamento"}/> 
@@ -63,7 +97,7 @@ const Home = async () => {
             </Card>
           </div>
 
-          <h2 className="text-xs font-bold text-gray-400 mt-5">
+          <h2 className="text-xs font-bold text-gray-400 mt-6 pb-5">
             RECOMENDADOS
           </h2>
 
@@ -72,8 +106,27 @@ const Home = async () => {
               <BarberShopItem key={barberShop.id} barberShop={barberShop}/>
             ))}
           </div>
+          
 
+          <h2 className="text-xs font-bold text-gray-400 mt-6 pb-5">
+            POPULARES
+          </h2>
+
+          <div className="flex gap-4 overflow-auto [&::-webkit-scrollbar]:hidden">
+            {barberShopPopular.map((barberShop) => (
+              <BarberShopItem key={barberShop.id} barberShop={barberShop}/>
+            ))}
+          </div>
         </div>
+
+        <footer>
+          <Card>
+            <CardContent className="items-center px-5 py-6">
+              <p className="text-sm text-gray-400">© 2023 Copyright <span className="font-semibold">FSW Barber</span></p>
+            </CardContent>
+          </Card>
+        </footer>
+  
     </div>
     
   )
