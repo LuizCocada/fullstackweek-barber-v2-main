@@ -7,6 +7,7 @@ import { db } from "./_lib/prisma"
 import BarberShopItem from "./_components/BarberShopItem"
 import { quickSearchOptions } from "./_constants/search"
 import BookingItem from "./_components/BookingItem"
+import InputSearch from "./_components/InputSearch"
 
 const Home = async () => {
 
@@ -27,11 +28,8 @@ const Home = async () => {
         <p className="pt-2">Sexta, 2 de Fevereiro</p>
 
         {/* INPUT E BUSCA */}
-        <div className="mt-6 gap-2 flex items-center">
-          <Input placeholder="Busque" />
-          <Button className="rounded">
-            <SearchIcon />
-          </Button>
+        <div className="mt-6">
+          <InputSearch />
         </div>
 
         {/* BUSCA RAPIDA */}

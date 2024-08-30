@@ -35,7 +35,14 @@
   * {
     @apply border-border antialiased;
   }
+  
+  html {
+    @apply h-full;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground h-full;
   }
 }
+
+/* h-full em html e body para o children em em layout ocupe todo o espaço em branco fazendo o footer sempre esta no lugar correto*/

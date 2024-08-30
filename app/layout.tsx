@@ -21,11 +21,16 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={inter.className}>
         <AuthProvider>
-          {children}
-          <Toaster />
-          <Footer />
+          <div className="h-full flex flex-col">
+            <div className="flex-1">{children}</div>
+            <Footer />
+          </div>
         </AuthProvider>
+        <Toaster />
       </body>
     </html>
   )
 }
+
+// fazendo desta forma, h-full, flex-1 conseguimos colocar o footer no fundo da pag, e o children ocupar todo o espaço vazio.
+// h-full em html e body para o children em em layout ocupe todo o espaço em branco fazendo o footer sempre esta no lugar correto
