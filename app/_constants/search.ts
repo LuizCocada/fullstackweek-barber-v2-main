@@ -27,6 +27,6 @@ export const quickSearchOptions: quickSearchOption[] = [
     },
     {
       imageUrl: "/hidratacao.svg",
-      title: "Hitratação"
+      title: "Hidratação"
     },
 ]

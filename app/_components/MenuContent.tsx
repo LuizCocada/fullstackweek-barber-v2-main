@@ -80,9 +80,11 @@ const MenuContent = () => {
 
             <div className="p-5 flex flex-col gap-5 border-b border-solid">
                 {quickSearchOptions.map((option) => (
-                    <Button className="rounded-xl justify-start border-none gap-2" variant="sheet" key={option.title}>
-                        <Image src={option.imageUrl} alt={option.title} width={18} height={18} />
-                        {option.title}
+                    <Button className="rounded-xl justify-start border-none gap-2" variant="sheet" key={option.title} asChild>
+                        <Link href={`/barbershops?service=${option.title}`}>
+                            <Image src={option.imageUrl} alt={option.title} width={18} height={18} />
+                            {option.title}
+                        </Link>
                     </Button>
                 ))}
             </div>
