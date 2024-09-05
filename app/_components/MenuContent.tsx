@@ -51,7 +51,7 @@ const MenuContent = () => {
                                     <DialogDescription>Conecte-se usando sua conta Google</DialogDescription>
                                 </DialogHeader>
                                 {/* PARA USAR ONCLICK 'OU QUALQUER INTERACAO JAVASCRIPT' O COMPONENTE PRECISA SER DO LADO DO CLIENT. OU SEJA, ADICIONAR 'use client' */}
-                                <Button className="flex gap-1 rounded-xl" variant={"sheet"} onClick={handleLoginWithGoogle}>
+                                <Button className="flex gap-1 rounded-xl" variant={"outline"} onClick={handleLoginWithGoogle}>
                                     <Image src={"/googleIcon.svg"} width={16} height={16} alt="icon Google" />
                                     <p className="font-bold">Google</p>
                                 </Button>
@@ -72,7 +72,7 @@ const MenuContent = () => {
                         </Link>
                     </Button>
                 </SheetClose>
-                <Button className="rounded-xl justify-start border-none gap-2" variant="sheet">
+                <Button className="rounded-xl justify-start border-none gap-2" variant="outline">
                     <CalendarIcon size={18} />
                     Agendamentos
                 </Button>
@@ -81,7 +81,7 @@ const MenuContent = () => {
             <div className="p-5 flex flex-col gap-5 border-b border-solid">
                 {quickSearchOptions.map((option) => (
                     <SheetClose key={option.title} asChild>
-                        <Button className="rounded-xl justify-start border-none gap-2" variant="sheet" asChild>
+                        <Button className="rounded-xl justify-start border-none gap-2" variant="outline" asChild>
                             <Link href={`/barbershops?service=${option.title}`}>
                                 <Image src={option.imageUrl} alt={option.title} width={18} height={18} />
                                 {option.title}
@@ -92,7 +92,7 @@ const MenuContent = () => {
             </div>
 
             <div className="p-5">
-                <Button className="rounded-xl flex gap-2 border-none" variant="sheet" onClick={handleLogOutGoogle}>
+                <Button className="rounded-xl flex gap-2 border-none" variant="outline" onClick={handleLogOutGoogle}>
                     <LogOutIcon />
                     Sair da conta
                 </Button>

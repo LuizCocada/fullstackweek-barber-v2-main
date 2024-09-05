@@ -1,0 +1,13 @@
+
+
+
+
+
+
+
+
+
+
+1 => Não exibir horários que ja foram agendados em 'ServiceItem'.
+
+2 => Não deixar o usuario NÃO logado fazer reserva.

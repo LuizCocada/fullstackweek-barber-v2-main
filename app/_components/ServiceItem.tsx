@@ -1,15 +1,86 @@
-import { BarbershopService } from "@prisma/client"
+"use client" //por conta do calendario;
+
+import { Barbershop, BarbershopService } from "@prisma/client"
 import Image from "next/image"
-import { serialize } from "v8"
 import { Button } from "./ui/button"
 import { Card, CardContent } from "./ui/card"
+import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
+import { Calendar } from "./ui/calendar"
+import { da, ptBR } from "date-fns/locale"
+import { useState } from "react"
+import { format, min, set } from "date-fns"
+import { createBooking } from "../_actions/create-booking"
+import { useSession } from "next-auth/react"
+import { toast } from "sonner"
 
 interface ServiceItemProps {
     service: BarbershopService
+    barbershop: Pick<Barbershop, 'name'>
 }
 
 
-const ServiceItem = ({ service }: ServiceItemProps) => {
+const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
+    const { data } = useSession()
+
+    //estado para o calendario de agendamento
+    const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined)
+    const handleSelectDay = (date: Date | undefined) => {
+        setSelectedDay(date)
+    }
+
+    //estado para o horario de agendamento
+    const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined)
+    const handleSelectTime = (time: string) => {
+        setSelectedTime(time)
+    }
+
+    const handleCreateBooking = async () => {
+        try {
+
+            if (!selectedDay || !selectedTime) return
+
+            const hour = Number(selectedTime.split(":")[0])
+            const minute = Number(selectedTime.split(":")[1])
+            //minutos e horas de selectedDay sao atualizados com as horas de selectedTime
+            //fazemos isso para combinar a data selecionada e combinar com o horario escolhido
+            const newDate = set(selectedDay, {
+                minutes: minute,
+                hours: hour
+            })
+
+            await createBooking({
+                serviceId: service.id,
+                userId: (data?.user as any).id,
+                date: newDate,
+            })
+            toast.success("Reserva criada com sucesso!")
+        } catch (error) {
+            console.log(error)
+            toast.error("Error ao criar reserva")
+        }
+    }
+
+    const timeList = [
+        "9:00",
+        "9:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "12:00",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+    ]
+
     return (
         <Card className="rounded-xl">
             <CardContent className="flex items-center gap-3 p-3">
@@ -30,9 +101,120 @@ const ServiceItem = ({ service }: ServiceItemProps) => {
                                 currency: 'BRL'
                             }).format(Number(service.price))}
                         </p>
-                        <Button className="rounded-xl" variant="secondary" size="sm">
-                            Reservar
-                        </Button>
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <Button className="rounded-xl" variant="secondary" size="sm">
+                                    Reservar
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent className="overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                                <SheetHeader>
+                                    <SheetTitle>Fazer Reserva</SheetTitle>
+                                </SheetHeader>
+
+                                <div className="border-b border-solid py-5">
+                                    <Calendar
+                                        mode={"single"}
+                                        locale={ptBR}
+                                        selected={selectedDay}
+                                        onSelect={handleSelectDay}
+                                        styles={{
+                                            head_cell: {
+                                                width: "100%",
+                                                textTransform: "capitalize",
+                                            },
+                                            cell: {
+                                                width: "100%",
+                                            },
+                                            button: {
+                                                width: "100%",
+                                            },
+                                            nav_button_previous: {
+                                                width: "32px",
+                                                height: "32px",
+                                            },
+                                            nav_button_next: {
+                                                width: "32px",
+                                                height: "32px",
+                                            },
+                                            caption: {
+                                                textTransform: "capitalize",
+                                            },
+                                        }}
+                                    //STYLES NESTE CASO APENAS PARA TELAS PEQUENAS, ONDE OCUPA 100% DO ESPAÇO, EM TELAS GRANDES ELE QUEBRA, `POSTERIORMENTE FAZER PARA TELAS GRANDES.`
+                                    />
+                                </div>
+
+                                {selectedDay && (
+                                    <div className="flex gap-1.5 border-b border-solid py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                                        {timeList.map((time) =>
+                                            <Button key={time} className="rounded-full"
+                                                size={"sm"}
+                                                variant={selectedTime == time ? "default" : "outline"}
+                                                onClick={() => handleSelectTime(time)}
+                                            >
+                                                {time}
+                                            </Button>
+                                        )}
+                                    </div>
+                                )}
+                                {/* Só rederiza caso tiver 'selectedTime' e tambem verifica se selectedDay nao é nulo para nao ocorrer conflito na formataçao date-fns*/}
+                                {selectedTime && selectedDay && (
+                                    <div className="py-5 space-y-10">
+                                        <Card className="rounded-xl">
+                                            <CardContent className="p-3 space-y-2">
+                                                <div className="flex items-center justify-between">
+                                                    <h2 className="font-bold">Corte de Cabelo</h2>
+                                                    <p className="text-sm font-bold">
+                                                        {Intl.NumberFormat("pt-BR", {
+                                                            style: "currency",
+                                                            currency: "BRL",
+                                                        }).format(Number(service.price))}
+                                                    </p>
+                                                </div>
+
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-sm text-gray-400">Data</p>
+                                                    {/* usando date-fns */}
+                                                    <p className="text-sm">
+                                                        {format(selectedDay, "d 'de' MMMM", {
+                                                            locale: ptBR,
+                                                        })}
+                                                    </p>
+                                                </div>
+
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-sm text-gray-400">Horário</p>
+                                                    {/* usando date-fns */}
+                                                    <p className="text-sm ">
+                                                        {selectedTime}
+                                                    </p>
+                                                </div>
+
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-sm text-gray-400">Barbearia</p>
+                                                    {/* usando date-fns */}
+                                                    <p className="text-sm ">
+                                                        {barbershop.name}
+                                                    </p>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                )}
+                                <SheetFooter>
+                                    <SheetClose asChild>
+                                        <Button
+                                            className="w-full rounded-xl"
+                                            onClick={(handleCreateBooking)}
+                                            disabled={!selectedTime || !selectedDay}
+                                        >
+                                            Confirmar
+                                        </Button>
+                                    </SheetClose>
+                                </SheetFooter>
+                            </SheetContent>
+                        </Sheet>
                     </div>
                 </div>
             </CardContent>

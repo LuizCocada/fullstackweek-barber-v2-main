@@ -84,11 +84,11 @@ model BarbershopService {
 
 model Booking {
   id        String            @id @default(uuid())
-  userId    String
+  userId    String //passa
   user      User              @relation(fields: [userId], references: [id])
-  serviceId String
+  serviceId String //passa
   service   BarbershopService @relation(fields: [serviceId], references: [id])
-  date      DateTime
+  date      DateTime //passa
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 }
