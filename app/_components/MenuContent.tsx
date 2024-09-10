@@ -6,14 +6,15 @@ import { CalendarIcon, HomeIcon, LogInIcon, LogOutIcon } from "lucide-react";
 import { SheetClose, SheetContent, SheetHeader, SheetTitle, } from "./ui/sheet";
 import { quickSearchOptions } from "../_constants/search";
 import Link from "next/link";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarImage } from "./ui/avatar";
+import DialogContentLogin from "./LoginDialogContent"
 
 const MenuContent = () => {
 
     const { data } = useSession() //gerenciar usuario logado
-    const handleLoginWithGoogle = () => signIn("google")
+
     const handleLogOutGoogle = () => signOut()
 
     return (
@@ -46,15 +47,7 @@ const MenuContent = () => {
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="w-[90%]">
-                                <DialogHeader>
-                                    <DialogTitle>Faça seu login na plataforma</DialogTitle>
-                                    <DialogDescription>Conecte-se usando sua conta Google</DialogDescription>
-                                </DialogHeader>
-                                {/* PARA USAR ONCLICK 'OU QUALQUER INTERACAO JAVASCRIPT' O COMPONENTE PRECISA SER DO LADO DO CLIENT. OU SEJA, ADICIONAR 'use client' */}
-                                <Button className="flex gap-1 rounded-xl" variant={"outline"} onClick={handleLoginWithGoogle}>
-                                    <Image src={"/googleIcon.svg"} width={16} height={16} alt="icon Google" />
-                                    <p className="font-bold">Google</p>
-                                </Button>
+                                <DialogContentLogin />
                             </DialogContent>
                         </Dialog>
                     </>
@@ -91,12 +84,14 @@ const MenuContent = () => {
                 ))}
             </div>
 
-            <div className="p-5">
-                <Button className="rounded-xl flex gap-2 border-none" variant="outline" onClick={handleLogOutGoogle}>
-                    <LogOutIcon />
-                    Sair da conta
-                </Button>
-            </div>
+            {data?.user && (
+                <div className="p-5">
+                    <Button className="rounded-xl flex gap-2 border-none" variant="outline" onClick={handleLogOutGoogle}>
+                        <LogOutIcon />
+                        Sair da conta
+                    </Button>
+                </div>
+            )}
         </SheetContent>
     );
 };
