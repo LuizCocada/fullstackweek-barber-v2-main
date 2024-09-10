@@ -1,17 +1,19 @@
 "use client" //por conta do calendario;
 
-import { Barbershop, BarbershopService } from "@prisma/client"
+import { Barbershop, BarbershopService, Booking } from "@prisma/client"
 import Image from "next/image"
 import { Button } from "./ui/button"
 import { Card, CardContent } from "./ui/card"
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
 import { Calendar } from "./ui/calendar"
-import { da, ptBR } from "date-fns/locale"
-import { useState } from "react"
-import { format, min, set } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import { useEffect, useState } from "react"
+import { addDays, format, min, set } from "date-fns"
 import { createBooking } from "../_actions/create-booking"
 import { useSession } from "next-auth/react"
 import { toast } from "sonner"
+import { GetBookings } from "../_actions/get-bookking"
+
 
 interface ServiceItemProps {
     service: BarbershopService
@@ -20,45 +22,44 @@ interface ServiceItemProps {
 
 
 const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
-    const { data } = useSession()
 
-    //estado para o calendario de agendamento
+    const { data } = useSession()//usuario logado. //gerenciar em pasta api'
+
+    //armazena o boolean para fechado e aberto do sheetBooking
+    const [bookingSheetItsOpen, setBookingSheetItsOpen] = useState(false)
+    //a cada mudança reseta todos as dependencias.
+    //é feito isto para assim que confirmamos a reserva, nao precise recarregar a pagina para resetar as dependencias.
+    const HandleBookingSheetOpenChange = () => {
+        setSelectedTime(undefined)
+        setSelectedDay(undefined)
+        setDayBookings([])
+        setBookingSheetItsOpen(false)//para fechar quando clicar no x ou fora do sheet
+    }
+
+    //armazena o dia selecionado no calendario 
     const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined)
     const handleSelectDay = (date: Date | undefined) => {
         setSelectedDay(date)
     }
 
-    //estado para o horario de agendamento
+
+    //armazena o horario selecionado
     const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined)
     const handleSelectTime = (time: string) => {
         setSelectedTime(time)
     }
 
-    const handleCreateBooking = async () => {
-        try {
-
-            if (!selectedDay || !selectedTime) return
-
-            const hour = Number(selectedTime.split(":")[0])
-            const minute = Number(selectedTime.split(":")[1])
-            //minutos e horas de selectedDay sao atualizados com as horas de selectedTime
-            //fazemos isso para combinar a data selecionada e combinar com o horario escolhido
-            const newDate = set(selectedDay, {
-                minutes: minute,
-                hours: hour
-            })
-
-            await createBooking({
-                serviceId: service.id,
-                userId: (data?.user as any).id,
-                date: newDate,
-            })
-            toast.success("Reserva criada com sucesso!")
-        } catch (error) {
-            console.log(error)
-            toast.error("Error ao criar reserva")
+    //armazena os agendamentos do banco conforme o dia selecionado
+    const [dayBookings, setDayBookings] = useState<Booking[]>([])//inicialmente vazio
+    //toda vez que a dependencia do array mudar, o useEffect fica responsavel por executar a função de busca.
+    useEffect(() => {
+        const fetch = async () => {
+            if (!selectedDay) return //se nao há dia selecionado, saia fora.
+            const bookings = await GetBookings({ serviceId: service.id, date: selectedDay }) //pegando o id do agendamento e o dia e fazendo a busca no banco.
+            setDayBookings(bookings)
         }
-    }
+        fetch()
+    }, [selectedDay, service.id])
 
     const timeList = [
         "9:00",
@@ -81,6 +82,48 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
         "19:00",
     ]
 
+    //lista de agendamentos do dia selecionado.
+    const dateBookings = dayBookings.map(dayBooking => dayBooking.date)
+    //formatando para hora e minuto para comparar com o timeList
+    const horaDiaAgendamento = dateBookings.map((dateBooking) => {
+        const parsedDate = new Date(dateBooking)
+        return format(parsedDate, 'H:mm')
+
+    })
+
+    const handleCreateBooking = async () => {
+        try {
+
+            if (!selectedDay || !selectedTime) return
+
+            //precisamos fazer isso pois inicialmente o selectedDay nao retorna a hora => Tue Sep 24 2024 00:00:00 GMT-0300 (Horário Padrão de Brasília) 
+            //necessitando assim, combinar a hora selecionada à o dia selecionado.
+            const hour = Number(selectedTime.split(":")[0])
+            const minute = Number(selectedTime.split(":")[1])
+            //ex: [09 : 00]
+
+            const newDate = set(selectedDay, {
+                minutes: minute,
+                hours: hour
+            })
+            //newDate => passando horas e minutos para o dia selecionado
+
+
+            await createBooking({
+                serviceId: service.id,
+                userId: (data?.user as any).id,
+                date: newDate,
+            })
+
+            toast.success("Reserva criada com sucesso!")
+        } catch (error) {
+            console.log(error)
+            toast.error("Error ao criar reserva")
+        }
+    }
+
+
+
     return (
         <Card className="rounded-xl">
             <CardContent className="flex items-center gap-3 p-3">
@@ -101,12 +144,10 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                                 currency: 'BRL'
                             }).format(Number(service.price))}
                         </p>
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <Button className="rounded-xl" variant="secondary" size="sm">
-                                    Reservar
-                                </Button>
-                            </SheetTrigger>
+                        <Sheet open={bookingSheetItsOpen} onOpenChange={HandleBookingSheetOpenChange}>
+                            <Button className="rounded-xl" variant="secondary" size="sm" onClick={() => setBookingSheetItsOpen(true)}>
+                                Reservar
+                            </Button>
                             <SheetContent className="overflow-y-auto [&::-webkit-scrollbar]:hidden">
                                 <SheetHeader>
                                     <SheetTitle>Fazer Reserva</SheetTitle>
@@ -118,6 +159,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                                         locale={ptBR}
                                         selected={selectedDay}
                                         onSelect={handleSelectDay}
+                                        fromDate={addDays(new Date(), 0)}//nao permite agendar no dia anterior à o presente. 
                                         styles={{
                                             head_cell: {
                                                 width: "100%",
@@ -145,17 +187,22 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                                     />
                                 </div>
 
+
+                                {/* map em banco de horario disponiveis e desabilita os horarios já registrados. */}
                                 {selectedDay && (
                                     <div className="flex gap-1.5 border-b border-solid py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-                                        {timeList.map((time) =>
-                                            <Button key={time} className="rounded-full"
-                                                size={"sm"}
-                                                variant={selectedTime == time ? "default" : "outline"}
-                                                onClick={() => handleSelectTime(time)}
-                                            >
-                                                {time}
-                                            </Button>
-                                        )}
+                                        {timeList
+                                            .map((time) =>
+                                                <Button key={time} className="rounded-full"
+                                                    size={"sm"}
+                                                    variant={selectedTime == time ? "default" : "outline"}
+                                                    onClick={() => handleSelectTime(time)}
+                                                    disabled={horaDiaAgendamento.includes(time)}//se haver agendamento no banco deixa a hora indisponivel
+                                                >
+                                                    {time}
+                                                </Button>
+                                            )
+                                        }
                                     </div>
                                 )}
                                 {/* Só rederiza caso tiver 'selectedTime' e tambem verifica se selectedDay nao é nulo para nao ocorrer conflito na formataçao date-fns*/}
@@ -164,7 +211,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                                         <Card className="rounded-xl">
                                             <CardContent className="p-3 space-y-2">
                                                 <div className="flex items-center justify-between">
-                                                    <h2 className="font-bold">Corte de Cabelo</h2>
+                                                    <h2 className="font-bold">{service.name}</h2>
                                                     <p className="text-sm font-bold">
                                                         {Intl.NumberFormat("pt-BR", {
                                                             style: "currency",

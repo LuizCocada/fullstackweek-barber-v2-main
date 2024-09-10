@@ -1,13 +1,24 @@
 
 
 
+coisas que podem quebrar: estou passando o serviceId no server-component 'GetBookings'
 
 
 
-
-
-
-
-1 => Não exibir horários que ja foram agendados em 'ServiceItem'.
+1 => Desabilitar horários que ja foram agendados em 'ServiceItem'. EM ANDAMENTO.
 
 2 => Não deixar o usuario NÃO logado fazer reserva.
+
+3 => ao reservar barbearia mande mensagem para o numero do adm;
+
+4 => POSTERIORMENTE pegar o numero do cliente e mandar mensagem para o proprio quando reservar um serviço.
+
+
+
+
+
+
+ATENCAO!!!!!!! => Botao de confirmar agendamento e horarios ficam desabilitados conforme as condicionais. Assim é possivel remover o disable dos componentes no lado do client (inspecionar navegador)
+    assim podendo ocasionar futuros conflitos por pessoas que burlam o sistema.
+
+possivel solução => ao inves de tornar ele desabilitado, fazer com que o componente só rederize caso for `true`. {OU} criar validações antes de efetuar alguma modificação no banco. 
