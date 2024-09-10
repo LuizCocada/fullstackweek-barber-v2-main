@@ -6,7 +6,7 @@ import { Button } from "./ui/button"
 import { Card, CardContent } from "./ui/card"
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
 import { Calendar } from "./ui/calendar"
-import { ptBR } from "date-fns/locale"
+import { da, ptBR } from "date-fns/locale"
 import { useEffect, useState } from "react"
 import { addDays, format, min, set } from "date-fns"
 import { createBooking } from "../_actions/create-booking"
@@ -15,7 +15,6 @@ import { toast } from "sonner"
 import { GetBookings } from "../_actions/get-bookking"
 import { Dialog, DialogContent } from "./ui/dialog"
 import LoginDialogContent from "./LoginDialogContent"
-import { boolean } from "zod"
 
 
 interface ServiceItemProps {
@@ -122,8 +121,8 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
 
 
             await createBooking({
-                serviceId: service.id,
                 userId: (data?.user as any).id,
+                serviceId: service.id,
                 date: newDate,
             })
 
