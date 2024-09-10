@@ -13,6 +13,9 @@ import { createBooking } from "../_actions/create-booking"
 import { useSession } from "next-auth/react"
 import { toast } from "sonner"
 import { GetBookings } from "../_actions/get-bookking"
+import { Dialog, DialogContent } from "./ui/dialog"
+import LoginDialogContent from "./LoginDialogContent"
+import { boolean } from "zod"
 
 
 interface ServiceItemProps {
@@ -23,7 +26,16 @@ interface ServiceItemProps {
 
 const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
 
+    
     const { data } = useSession()//usuario logado. //gerenciar em pasta api'
+    
+    const [signInDialogItsOpen, setSignInDialogItsOpen] = useState(false)
+    const handleVeridyUserLoggedIn = () => {
+        if(data?.user){
+            return setBookingSheetItsOpen(true)
+        }
+        return setSignInDialogItsOpen(true)
+    }
 
     //armazena o boolean para fechado e aberto do sheetBooking
     const [bookingSheetItsOpen, setBookingSheetItsOpen] = useState(false)
@@ -125,148 +137,162 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
 
 
     return (
-        <Card className="rounded-xl">
-            <CardContent className="flex items-center gap-3 p-3">
-                <div className="relative max-h-[110px] min-h-[110px] max-w-[110px] min-w-[110px]">
-                    <Image alt={service.name} src={service.imageUrl} fill className="object-cover rounded-lg" />
-                </div>
-
-                <div className="space-y-2">
-                    <div>
-                        <h3 className="font-semibold text-sm">{service.name}</h3>
-                        <p className="text-sm text-gray-400">{service.description}</p>
+        <>
+            <Card className="rounded-xl">
+                <CardContent className="flex items-center gap-3 p-3">
+                    <div className="relative max-h-[110px] min-h-[110px] max-w-[110px] min-w-[110px]">
+                        <Image alt={service.name} src={service.imageUrl} fill className="object-cover rounded-lg" />
                     </div>
 
-                    <div className="flex items-center justify-between">
-                        <p className="text-sm font-bold text-primary">
-                            {Intl.NumberFormat("pt-BR", {
-                                style: 'currency',
-                                currency: 'BRL'
-                            }).format(Number(service.price))}
-                        </p>
-                        <Sheet open={bookingSheetItsOpen} onOpenChange={HandleBookingSheetOpenChange}>
-                            <Button className="rounded-xl" variant="secondary" size="sm" onClick={() => setBookingSheetItsOpen(true)}>
-                                Reservar
-                            </Button>
-                            <SheetContent className="overflow-y-auto [&::-webkit-scrollbar]:hidden">
-                                <SheetHeader>
-                                    <SheetTitle>Fazer Reserva</SheetTitle>
-                                </SheetHeader>
+                    <div className="space-y-2">
+                        <div>
+                            <h3 className="font-semibold text-sm">{service.name}</h3>
+                            <p className="text-sm text-gray-400">{service.description}</p>
+                        </div>
 
-                                <div className="border-b border-solid py-5">
-                                    <Calendar
-                                        mode={"single"}
-                                        locale={ptBR}
-                                        selected={selectedDay}
-                                        onSelect={handleSelectDay}
-                                        fromDate={addDays(new Date(), 0)}//nao permite agendar no dia anterior à o presente. 
-                                        styles={{
-                                            head_cell: {
-                                                width: "100%",
-                                                textTransform: "capitalize",
-                                            },
-                                            cell: {
-                                                width: "100%",
-                                            },
-                                            button: {
-                                                width: "100%",
-                                            },
-                                            nav_button_previous: {
-                                                width: "32px",
-                                                height: "32px",
-                                            },
-                                            nav_button_next: {
-                                                width: "32px",
-                                                height: "32px",
-                                            },
-                                            caption: {
-                                                textTransform: "capitalize",
-                                            },
-                                        }}
-                                    //STYLES NESTE CASO APENAS PARA TELAS PEQUENAS, ONDE OCUPA 100% DO ESPAÇO, EM TELAS GRANDES ELE QUEBRA, `POSTERIORMENTE FAZER PARA TELAS GRANDES.`
-                                    />
-                                </div>
+                        <div className="flex items-center justify-between">
+                            <p className="text-sm font-bold text-primary">
+                                {Intl.NumberFormat("pt-BR", {
+                                    style: 'currency',
+                                    currency: 'BRL'
+                                }).format(Number(service.price))}
+                            </p>
+                            <Sheet open={bookingSheetItsOpen} onOpenChange={HandleBookingSheetOpenChange}>
+                                <Button className="rounded-xl" variant="secondary" size="sm"
+                                    onClick={handleVeridyUserLoggedIn}
+                                >
+                                    Reservar
+                                </Button>
+                                <SheetContent className="overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                                    <SheetHeader>
+                                        <SheetTitle>Fazer Reserva</SheetTitle>
+                                    </SheetHeader>
 
-
-                                {/* map em banco de horario disponiveis e desabilita os horarios já registrados. */}
-                                {selectedDay && (
-                                    <div className="flex gap-1.5 border-b border-solid py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-                                        {timeList
-                                            .map((time) =>
-                                                <Button key={time} className="rounded-full"
-                                                    size={"sm"}
-                                                    variant={selectedTime == time ? "default" : "outline"}
-                                                    onClick={() => handleSelectTime(time)}
-                                                    disabled={horaDiaAgendamento.includes(time)}//se haver agendamento no banco deixa a hora indisponivel
-                                                >
-                                                    {time}
-                                                </Button>
-                                            )
-                                        }
+                                    <div className="border-b border-solid py-5">
+                                        <Calendar
+                                            mode={"single"}
+                                            locale={ptBR}
+                                            selected={selectedDay}
+                                            onSelect={handleSelectDay}
+                                            fromDate={addDays(new Date(), 0)}//nao permite agendar no dia anterior à o presente. 
+                                            styles={{
+                                                head_cell: {
+                                                    width: "100%",
+                                                    textTransform: "capitalize",
+                                                },
+                                                cell: {
+                                                    width: "100%",
+                                                },
+                                                button: {
+                                                    width: "100%",
+                                                },
+                                                nav_button_previous: {
+                                                    width: "32px",
+                                                    height: "32px",
+                                                },
+                                                nav_button_next: {
+                                                    width: "32px",
+                                                    height: "32px",
+                                                },
+                                                caption: {
+                                                    textTransform: "capitalize",
+                                                },
+                                            }}
+                                        //STYLES NESTE CASO APENAS PARA TELAS PEQUENAS, ONDE OCUPA 100% DO ESPAÇO, EM TELAS GRANDES ELE QUEBRA, `POSTERIORMENTE FAZER PARA TELAS GRANDES.`
+                                        />
                                     </div>
-                                )}
-                                {/* Só rederiza caso tiver 'selectedTime' e tambem verifica se selectedDay nao é nulo para nao ocorrer conflito na formataçao date-fns*/}
-                                {selectedTime && selectedDay && (
-                                    <div className="py-5 space-y-10">
-                                        <Card className="rounded-xl">
-                                            <CardContent className="p-3 space-y-2">
-                                                <div className="flex items-center justify-between">
-                                                    <h2 className="font-bold">{service.name}</h2>
-                                                    <p className="text-sm font-bold">
-                                                        {Intl.NumberFormat("pt-BR", {
-                                                            style: "currency",
-                                                            currency: "BRL",
-                                                        }).format(Number(service.price))}
-                                                    </p>
-                                                </div>
 
-                                                <div className="flex items-center justify-between">
-                                                    <p className="text-sm text-gray-400">Data</p>
-                                                    {/* usando date-fns */}
-                                                    <p className="text-sm">
-                                                        {format(selectedDay, "d 'de' MMMM", {
-                                                            locale: ptBR,
-                                                        })}
-                                                    </p>
-                                                </div>
 
-                                                <div className="flex items-center justify-between">
-                                                    <p className="text-sm text-gray-400">Horário</p>
-                                                    {/* usando date-fns */}
-                                                    <p className="text-sm ">
-                                                        {selectedTime}
-                                                    </p>
-                                                </div>
+                                    {/* map em banco de horario disponiveis e desabilita os horarios já registrados. */}
+                                    {selectedDay && (
+                                        <div className="flex gap-1.5 border-b border-solid py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                                            {timeList
+                                                .map((time) =>
+                                                    <Button key={time} className="rounded-full"
+                                                        size={"sm"}
+                                                        variant={selectedTime == time ? "default" : "outline"}
+                                                        onClick={() => handleSelectTime(time)}
+                                                        disabled={horaDiaAgendamento.includes(time)}//se haver agendamento no banco deixa a hora indisponivel
+                                                    >
+                                                        {time}
+                                                    </Button>
+                                                )
+                                            }
+                                        </div>
+                                    )}
+                                    {/* Só rederiza caso tiver 'selectedTime' e tambem verifica se selectedDay nao é nulo para nao ocorrer conflito na formataçao date-fns*/}
+                                    {selectedTime && selectedDay && (
+                                        <div className="py-5 space-y-10">
+                                            <Card className="rounded-xl">
+                                                <CardContent className="p-3 space-y-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <h2 className="font-bold">{service.name}</h2>
+                                                        <p className="text-sm font-bold">
+                                                            {Intl.NumberFormat("pt-BR", {
+                                                                style: "currency",
+                                                                currency: "BRL",
+                                                            }).format(Number(service.price))}
+                                                        </p>
+                                                    </div>
 
-                                                <div className="flex items-center justify-between">
-                                                    <p className="text-sm text-gray-400">Barbearia</p>
-                                                    {/* usando date-fns */}
-                                                    <p className="text-sm ">
-                                                        {barbershop.name}
-                                                    </p>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </div>
-                                )}
-                                <SheetFooter>
-                                    <SheetClose asChild>
-                                        <Button
-                                            className="w-full rounded-xl"
-                                            onClick={(handleCreateBooking)}
-                                            disabled={!selectedTime || !selectedDay}
-                                        >
-                                            Confirmar
-                                        </Button>
-                                    </SheetClose>
-                                </SheetFooter>
-                            </SheetContent>
-                        </Sheet>
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="text-sm text-gray-400">Data</p>
+                                                        {/* usando date-fns */}
+                                                        <p className="text-sm">
+                                                            {format(selectedDay, "d 'de' MMMM", {
+                                                                locale: ptBR,
+                                                            })}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="text-sm text-gray-400">Horário</p>
+                                                        {/* usando date-fns */}
+                                                        <p className="text-sm ">
+                                                            {selectedTime}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="text-sm text-gray-400">Barbearia</p>
+                                                        {/* usando date-fns */}
+                                                        <p className="text-sm ">
+                                                            {barbershop.name}
+                                                        </p>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </div>
+                                    )}
+                                    <SheetFooter>
+                                        <SheetClose asChild>
+                                            <Button
+                                                className="w-full rounded-xl"
+                                                onClick={(handleCreateBooking)}
+                                                disabled={!selectedTime || !selectedDay}
+                                            >
+                                                Confirmar
+                                            </Button>
+                                        </SheetClose>
+                                    </SheetFooter>
+                                </SheetContent>
+                            </Sheet>
+                        </div>
                     </div>
-                </div>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+
+            <Dialog
+                open={signInDialogItsOpen}
+                onOpenChange={(open) => setSignInDialogItsOpen(open)} //atualiza o estado de 'signInDialogItsOpen'
+            >
+                <DialogContent className="w-[90%]">
+                    <LoginDialogContent />
+                </DialogContent>
+            </Dialog>
+        </>
     )
+
 }
 
 export default ServiceItem
