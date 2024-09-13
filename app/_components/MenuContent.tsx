@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import DialogContentLogin from "./LoginDialogContent"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
+
 
 const MenuContent = () => {
 
@@ -65,9 +67,11 @@ const MenuContent = () => {
                         </Link>
                     </Button>
                 </SheetClose>
-                <Button className="rounded-xl justify-start border-none gap-2" variant="outline">
-                    <CalendarIcon size={18} />
-                    Agendamentos
+                <Button className="rounded-xl justify-start border-none gap-2" variant="outline" asChild>
+                    <Link href={"/bookings"}>
+                        <CalendarIcon size={18} />
+                        Agendamentos
+                    </Link>
                 </Button>
             </div>
 
@@ -86,10 +90,24 @@ const MenuContent = () => {
 
             {data?.user && (
                 <div className="p-5">
-                    <Button className="rounded-xl flex gap-2 border-none" variant="outline" onClick={handleLogOutGoogle}>
-                        <LogOutIcon />
-                        Sair da conta
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button className="rounded-xl flex gap-2 border-none" variant="outline">
+                                <LogOutIcon />
+                                Sair da conta
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="w-[90%]">
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Sair</AlertDialogTitle>
+                                <AlertDialogDescription>Deseja mesmo sair da plataforma?</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                <AlertDialogAction className="rounded-xl" onClick={handleLogOutGoogle}>Sair</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             )}
         </SheetContent>
