@@ -12,6 +12,9 @@ import { authOptions } from "./_lib/authOptions"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
+
+
+
 const Home = async () => {
   const session = await getServerSession(authOptions) //usuario logado.
 
@@ -24,29 +27,27 @@ const Home = async () => {
 
   const ConfirmedBookings = await db.booking.findMany({
     where: {
-        userId: (session?.user as any).id,
-        date: {
-            gte: new Date() //filtrando apenas os agendamentos que as dadas sao maiores que o dia, mes e hora de hoje.
-        }
+      date: {
+        gte: new Date() //filtrando apenas os agendamentos que as dadas sao maiores que o dia, mes e hora de hoje.
+      }
     },
     include: {
-        service: {//incluindo serviços e barbearias ligadas.
-            include: {
-                barbershop: true
-            },
+      service: {//incluindo serviços e barbearias ligadas.
+        include: {
+          barbershop: true
         },
+      },
     },
-    orderBy:{
+    orderBy: {
       date: 'asc'
     }
-})
+  })
 
   const date = new Date()
 
   const formattedDate = format(date, "EE, d 'de' MMMM", { locale: ptBR });
 
   const CapitalizeFirstStringOfDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-
 
   return (
     <div>
@@ -120,7 +121,6 @@ const Home = async () => {
         </div>
       </div>
     </div>
-
   )
 }
 

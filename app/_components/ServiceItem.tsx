@@ -222,7 +222,8 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                                     {/* Só rederiza caso tiver 'selectedTime' e tambem verifica se selectedDay nao é nulo para nao ocorrer conflito na formataçao date-fns*/}
                                     {selectedTime && selectedDay && (
                                         <div className="py-5 space-y-10">
-                                            <Card className="rounded-xl">
+                                            {/* RESUMO */}
+                                            <Card className="rounded-xl"> 
                                                 <CardContent className="p-3 space-y-2">
                                                     <div className="flex items-center justify-between">
                                                         <h2 className="font-bold">{service.name}</h2>
@@ -246,7 +247,6 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
 
                                                     <div className="flex items-center justify-between">
                                                         <p className="text-sm text-gray-400">Horário</p>
-                                                        {/* usando date-fns */}
                                                         <p className="text-sm ">
                                                             {selectedTime}
                                                         </p>

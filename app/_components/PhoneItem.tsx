@@ -9,7 +9,7 @@ interface PhoneItemPros {
 }
 
 
-const PhoneItem = ({phone}: PhoneItemPros) => {
+const PhoneItem = ({ phone }: PhoneItemPros) => {
 
     const handleCopyPhoneClick = (phone: string) => { //funcao que copia
         navigator.clipboard.writeText(phone)
@@ -18,18 +18,18 @@ const PhoneItem = ({phone}: PhoneItemPros) => {
 
     return (
         <div className="flex justify-between items-center" key={phone}>
-        <div>
-            <div className="flex items-center gap-2">
-                <SmartphoneIcon />
-                <p className="text-sm">{phone}</p>
+            <div>
+                <div className="flex items-center gap-2">
+                    <SmartphoneIcon />
+                    <p className="text-sm">{phone}</p>
+                </div>
+            </div>
+            <div>
+                <Button onClick={() => handleCopyPhoneClick(phone)} variant="outline" size="sm" className="rounded-xl">
+                    Copiar
+                </Button>
             </div>
         </div>
-        <div>
-            <Button onClick={() => handleCopyPhoneClick(phone)} variant="outline" size="sm">
-                Copiar
-            </Button>
-        </div>
-    </div>
     )
 }
 

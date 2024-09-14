@@ -5,9 +5,6 @@ coisas que podem quebrar: estou passando o serviceId no server-component 'GetBoo
 
 
 
-1 => Desabilitar horários que ja foram agendados em 'ServiceItem'. EM ANDAMENTO.
-
-2 => Não deixar o usuario NÃO logado fazer reserva.
 
 3 => ao reservar barbearia mande mensagem para o numero do adm;
 
@@ -22,3 +19,7 @@ ATENCAO!!!!!!! => Botao de confirmar agendamento e horarios ficam desabilitados 
     assim podendo ocasionar futuros conflitos por pessoas que burlam o sistema.
 
 possivel solução => ao inves de tornar ele desabilitado, fazer com que o componente só rederize caso for `true`. {OU} criar validações antes de efetuar alguma modificação no banco. 
+
+
+
+ERROR!!!!!!! => O error que está tendo no terminal, é por que a key passada para PhoneItem é duplicada, pois no banco há numeros repetidos e fakes.
