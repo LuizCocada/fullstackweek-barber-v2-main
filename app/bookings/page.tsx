@@ -28,9 +28,9 @@ const Bookings = async () => {
                 },
             },
         },
-        orderBy:{
+        orderBy: {
             date: 'asc'
-          }
+        }
     })
 
     const CanceledBookings = await db.booking.findMany({
@@ -47,9 +47,9 @@ const Bookings = async () => {
                 },
             },
         },
-        orderBy:{
+        orderBy: {
             date: 'asc'
-          }
+        } 
     })
 
     return (
@@ -60,18 +60,29 @@ const Bookings = async () => {
                 <h2 className="font-bold text-xl">Agendamentos</h2>
 
                 <div className="space-y-3">
-                    <p className="text-sm text-gray-400">CONFIRMADOS</p>
-                    {ConfirmedBookings.map((booking) => (
-                        <BookingItem key={booking.id} booking={booking} /> //ou passamos service={booking.service} e recebemos em BookingItem service como prop.
-                    ))}
+                {ConfirmedBookings.length > 0 && (
+                        <>
+                            <p className="text-sm text-gray-400">
+                                CONFIRMADOS
+                            </p>
+                            {ConfirmedBookings.map((booking) => (
+                                <BookingItem key={booking.id} booking={booking} /> //ou passamos service={booking.service} e recebemos em BookingItem service como prop.
+                            ))}
+                        </>
+                    )}
                 </div>
 
-
                 <div className="space-y-3">
-                    <p className="text-sm text-gray-400">FINALIZADOS</p>
-                    {CanceledBookings.map((booking) => (
-                        <BookingItem key={booking.id} booking={booking} /> //ou passamos service={booking.service} e recebemos em BookingItem service como prop.
-                    ))}
+                    {CanceledBookings.length > 0 && (
+                        <>
+                            <p className="text-sm text-gray-400">
+                                FINALIZADOS
+                            </p>
+                            {CanceledBookings.map((booking) => (
+                                <BookingItem key={booking.id} booking={booking} /> //ou passamos service={booking.service} e recebemos em BookingItem service como prop.
+                            ))}
+                        </>
+                    )}
                 </div>
             </div>
         </>

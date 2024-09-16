@@ -1,12 +1,20 @@
+"use client" //tem Onclick()
+
 import { Card, CardContent } from "./ui/card"
 import { Badge } from "./ui/badge"
 import { Avatar, AvatarImage } from "./ui/avatar"
 import { Prisma } from "@prisma/client"
 import { format, isFuture } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
+import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
 import Image from "next/image"
 import PhoneItem from "./PhoneItem"
+import { Button } from "./ui/button"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog"
+import { deleteBooking } from "../_actions/delete-booking"
+import { toast } from "sonner"
+import { useState } from "react"
+
 
 
 interface BookingItemProps { //podemos fazer assim, ou receber o barbershopService como prop de serviceItem(por enquanto)
@@ -18,18 +26,32 @@ interface BookingItemProps { //podemos fazer assim, ou receber o barbershopServi
         },
       },
     },
-  }>
+  }> 
 }
 
 const BookingItem = ({ booking }: BookingItemProps) => {
 
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
+
+
   const isConfirmed = isFuture(booking.date)//será confirmado se a data for maior que a ano, mes, dia e hora de hoje.
+  
+  const handleCancelBooking = async () => {
+    try {
+      await deleteBooking(booking.id)
+      setIsSheetOpen(false)
+      toast.success("Reserva cancelada com sucesso!")
+    } catch (error) {
+      console.log(error)
+      toast.error("Error ao cancelar reserva.")
+    }
+  }
 
   return (
     <>
-      <Sheet>
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger className="cursor-pointer" asChild>
-          <div className="min-w-[90%]">
+          <div className="min-w-[100%]">
             <Card className="rounded-3xl">
               <CardContent className="flex justify-between p-0">
                 <div className="flex flex-col gap-2 py-5 pl-5">
@@ -89,50 +111,98 @@ const BookingItem = ({ booking }: BookingItemProps) => {
             </Badge>
 
             <Card className="rounded-xl">
-            <CardContent className="p-3 space-y-2">
+              <CardContent className="p-3 space-y-2">
                 <div className="flex items-center justify-between">
-                    <h2 className="font-bold">{booking.service.name}</h2>
-                    <p className="text-sm font-bold">
-                        {Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                        }).format(Number(booking.service.price))}
-                    </p>
+                  <h2 className="font-bold">{booking.service.name}</h2>
+                  <p className="text-sm font-bold">
+                    {Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(Number(booking.service.price))}
+                  </p>
                 </div>
 
                 <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-400">Data</p>
-                    {/* usando date-fns */}
-                    <p className="text-sm">
-                        {format(booking.date, "d 'de' MMMM", {
-                            locale: ptBR,
-                        })}
-                    </p>
+                  <p className="text-sm text-gray-400">Data</p>
+                  {/* usando date-fns */}
+                  <p className="text-sm">
+                    {format(booking.date, "d 'de' MMMM", {
+                      locale: ptBR,
+                    })}
+                  </p>
                 </div>
 
                 <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-400">Horário</p>
-                    {/* usando date-fns */}
-                    <p className="text-sm">
-                        {format(booking.date, "H:mm")}
-                    </p>
+                  <p className="text-sm text-gray-400">Horário</p>
+                  {/* usando date-fns */}
+                  <p className="text-sm">
+                    {format(booking.date, "H:mm")}
+                  </p>
                 </div>
 
                 <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-400">Barbearia</p>
-                    {/* usando date-fns */}
-                    <p className="text-sm ">
-                        {booking.service.barbershop.name}
-                    </p>
+                  <p className="text-sm text-gray-400">Barbearia</p>
+                  {/* usando date-fns */}
+                  <p className="text-sm ">
+                    {booking.service.barbershop.name}
+                  </p>
                 </div>
-            </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
             <div className="space-y-5">
               {booking.service.barbershop.phones.map((phone, index) => (
-                 <PhoneItem phone={phone} key={index} />
+                <PhoneItem phone={phone} key={index} />
               ))}
             </div>
+
+            <SheetFooter>
+              <div className="flex items-center gap-3">
+                <SheetClose asChild>
+                  <Button className="w-full rounded-xl font-semibold" variant={"outline"}>
+                    Voltar
+                  </Button>
+                </SheetClose>
+
+
+                {isConfirmed
+                  ?
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button className="w-full rounded-xl font-semibold" variant={"destructive"}>
+                        Cancelar Reserva
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="w-[90%] flex flex-col">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Cancelar Reserva</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tem certeza que deseja cancelar este agendamento?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <div className="flex items-center gap-3">
+                          <AlertDialogCancel className="m-0 w-full rounded-xl">
+                            Voltar
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            className="m-0 w-full rounded-xl"
+                            onClick={handleCancelBooking}
+                          >
+                            Confirmar
+                          </AlertDialogAction>
+                        </div>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  :
+                  <Button className="w-full rounded-xl font-semibold">
+                    Avaliar
+                  </Button>
+                }
+
+              </div>
+            </SheetFooter>
 
           </div>
         </SheetContent>

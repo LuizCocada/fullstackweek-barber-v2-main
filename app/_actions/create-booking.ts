@@ -28,6 +28,7 @@ export const createBooking = async (params: createBookingParams) => {
     data: params,
   })
   revalidatePath("/barbershops/[id]") //limpa o cache após criar um agendamento
+  revalidatePath("/bookings") //revalidando os dados após crioar um agendamento
 }
 
 //podemos verificar se o ID recebido bate com o id da sessao atual.

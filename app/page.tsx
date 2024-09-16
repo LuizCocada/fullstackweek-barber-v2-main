@@ -43,9 +43,8 @@ const Home = async () => {
     }
   })
 
-  const date = new Date()
 
-  const formattedDate = format(date, "EE, d 'de' MMMM", { locale: ptBR });
+  const formattedDate = format(new Date(), "EE, d 'de' MMMM", { locale: ptBR });
 
   const CapitalizeFirstStringOfDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 

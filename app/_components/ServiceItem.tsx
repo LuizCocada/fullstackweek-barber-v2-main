@@ -8,7 +8,7 @@ import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, 
 import { Calendar } from "./ui/calendar"
 import { da, ptBR } from "date-fns/locale"
 import { useEffect, useState } from "react"
-import { addDays, format, min, set } from "date-fns"
+import { addDays, format, isFuture, set, parse, isPast, isToday, addHours } from "date-fns"
 import { createBooking } from "../_actions/create-booking"
 import { useSession } from "next-auth/react"
 import { toast } from "sonner"
@@ -22,15 +22,13 @@ interface ServiceItemProps {
     barbershop: Pick<Barbershop, 'name'>
 }
 
-
 const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
 
-    
     const { data } = useSession()//usuario logado. //gerenciar em pasta api'
-    
+
     const [signInDialogItsOpen, setSignInDialogItsOpen] = useState(false)
     const handleVeridyUserLoggedIn = () => {
-        if(data?.user){
+        if (data?.user) {
             return setBookingSheetItsOpen(true)
         }
         return setSignInDialogItsOpen(true)
@@ -72,9 +70,11 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
         fetch()
     }, [selectedDay, service.id])
 
+    //para os filtros funcionarem corretamente o formato precisa ser HH:mm e nao H:mm
+    //
     const timeList = [
-        "9:00",
-        "9:30",
+        "09:00",
+        "09:30",
         "10:00",
         "10:30",
         "11:00",
@@ -99,8 +99,20 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
     const horaDiaAgendamento = dateBookings.map((dateBooking) => {
         const parsedDate = new Date(dateBooking)
         return format(parsedDate, 'H:mm')
-
     })
+
+    //este bloco filtra 'timeList' e só devolve horarios maiores que o atual.
+    const filterTimeListValidhour = timeList.map((time) => {
+        const dateTimeString = `${selectedDay?.toISOString().split('T')[0]}T${time}:00`;
+        return new Date(dateTimeString);//passando dateTimeString para um objeto Date (para ser usado no filtro abaixo.)
+    })
+        .filter((date) => date.getTime() > new Date().getTime()) //filtrando apenas as datas que forem maior que a data, hora e minuto atual
+        .map((date) => {
+            const hours = date.getHours();//pegando horas 
+            const minutes = date.getMinutes().toString().padStart(2, '0'); //pegando minutos e adicionando zero à esquerda se preciso.
+            return `${hours}:${minutes}`;// tempo disponivel ara reserva à partir da hora e minuto do dia atual.
+        }
+        );
 
     const handleCreateBooking = async () => {
         try {
@@ -132,6 +144,11 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
             toast.error("Error ao criar reserva")
         }
     }
+
+
+
+
+
 
 
 
@@ -173,7 +190,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                                             locale={ptBR}
                                             selected={selectedDay}
                                             onSelect={handleSelectDay}
-                                            fromDate={addDays(new Date(), 0)}//nao permite agendar no dia anterior à o presente. 
+                                            fromDate={new Date()}//nao permite agendar no dia anterior à o presente. 
                                             styles={{
                                                 head_cell: {
                                                     width: "100%",
@@ -205,8 +222,8 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                                     {/* map em banco de horario disponiveis e desabilita os horarios já registrados. */}
                                     {selectedDay && (
                                         <div className="flex gap-1.5 border-b border-solid py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-                                            {timeList
-                                                .map((time) =>
+                                             {filterTimeListValidhour.length > 0 ? (
+                                             filterTimeListValidhour.map((time) => //listTimeString filtrando do array timeList apenas as datas que estao no futuro.
                                                     <Button key={time} className="rounded-full"
                                                         size={"sm"}
                                                         variant={selectedTime == time ? "default" : "outline"}
@@ -216,14 +233,17 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                                                         {time}
                                                     </Button>
                                                 )
+
+                                            ) : <p className="text-sm font-semibold text-destructive">Não há horários disponiveis para hoje</p>
                                             }
                                         </div>
                                     )}
+
                                     {/* Só rederiza caso tiver 'selectedTime' e tambem verifica se selectedDay nao é nulo para nao ocorrer conflito na formataçao date-fns*/}
                                     {selectedTime && selectedDay && (
                                         <div className="py-5 space-y-10">
                                             {/* RESUMO */}
-                                            <Card className="rounded-xl"> 
+                                            <Card className="rounded-xl">
                                                 <CardContent className="p-3 space-y-2">
                                                     <div className="flex items-center justify-between">
                                                         <h2 className="font-bold">{service.name}</h2>
