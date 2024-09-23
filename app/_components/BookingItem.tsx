@@ -51,7 +51,7 @@ const BookingItem = ({ booking }: BookingItemProps) => {
     <>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger className="cursor-pointer" asChild>
-          <div className="min-w-[100%]">
+          <div className="min-w-[90%] mt-3">
             <Card className="rounded-3xl">
               <CardContent className="flex justify-between p-0">
                 <div className="flex flex-col gap-2 py-5 pl-5">

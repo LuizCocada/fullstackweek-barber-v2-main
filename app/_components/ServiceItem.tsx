@@ -144,11 +144,6 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
         }
     }
 
-
-
-
-
-
     return (
         <>
             <Card className="rounded-xl">
