@@ -18,5 +18,5 @@ if(process.env.NODE_ENV == "production"){
 
 export const db = prisma
 
-//conexao db
+// conexao db
 // este codigo garante que quando salvarmos ou recompilarmos nossa aplicação, nao irá abrir multiplas conexoes com o banco de dados.
