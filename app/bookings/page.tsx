@@ -2,10 +2,8 @@ import { getServerSession } from "next-auth"
 import Header from "../_components/Header"
 import { authOptions } from "../_lib/authOptions"
 import { db } from "../_lib/prisma"
-import { equal } from "assert"
 import { notFound } from "next/navigation"
 import BookingItem from "../_components/BookingItem"
-import { addDays } from "date-fns"
 
 const Bookings = async () => {
 

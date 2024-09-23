@@ -7,7 +7,7 @@ import { SheetClose, SheetContent, SheetHeader, SheetTitle, } from "./ui/sheet";
 import { quickSearchOptions } from "../_constants/search";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import DialogContentLogin from "./LoginDialogContent"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
