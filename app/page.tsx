@@ -27,6 +27,7 @@ const Home = async () => {
 
   const ConfirmedBookings = await db.booking.findMany({
     where: {
+      userId: (session?.user as any).id,
       date: {
         gte: new Date() //filtrando apenas os agendamentos que as dadas sao maiores que o dia, mes e hora de hoje.
       }
@@ -92,10 +93,18 @@ const Home = async () => {
               <h2 className="text-xs font-bold text-gray-400 mt-6 pb-2">
                 AGENDAMENTOS
               </h2>
-              {/* AGENDAMENTO => Booking */}
-              <div className="flex overflow-x-auto gap-3 [&::-webkit-scrollbar]:hidden">
-                {ConfirmedBookings.map(booking => <BookingItem key={booking.id} booking={booking} />)}
-              </div>
+
+              {ConfirmedBookings.length > 0 ? (
+                <div className="flex overflow-x-auto gap-3 [&::-webkit-scrollbar]:hidden">
+                  {ConfirmedBookings.map(booking => <BookingItem key={booking.id} booking={booking} />)}
+                </div>
+              )
+                :
+                (
+                  <div className="p-5">
+                    <p className="text-sm text-gray-400">Não há agendamentos por enquanto...</p>
+                  </div>
+                )}
             </>
           )
         }
