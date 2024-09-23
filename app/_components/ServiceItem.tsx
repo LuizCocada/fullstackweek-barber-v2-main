@@ -71,7 +71,6 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
     }, [selectedDay, service.id])
 
     //para os filtros funcionarem corretamente o formato precisa ser HH:mm e nao H:mm
-    //
     const timeList = [
         "09:00",
         "09:30",
@@ -144,8 +143,6 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
             toast.error("Error ao criar reserva")
         }
     }
-
-
 
 
 
