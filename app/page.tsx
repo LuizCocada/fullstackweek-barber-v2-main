@@ -13,6 +13,7 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
 
+
 const Home = async () => {
   const session = await getServerSession(authOptions) //usuario logado.
 
@@ -23,23 +24,29 @@ const Home = async () => {
     }
   })
 
-  const ConfirmedBookings = await db.booking.findMany({
-    where: {
-      date: {
-        gte: new Date() //filtrando apenas os agendamentos que as dadas sao maiores que o dia, mes e hora de hoje.
-      }
-    },
-    include: {
-      service: {//incluindo serviços e barbearias ligadas.
-        include: {
-          barbershop: true
+  let ConfirmedBookings: any[] = [] //inicializando como lista vazia e so faz a busca no banco se tiver usuario logado.
+
+
+  if(session?.user){
+    ConfirmedBookings = await db.booking.findMany({
+      where: {
+        userId: (session?.user as any).id,
+        date: {
+          gte: new Date() //filtrando apenas os agendamentos que as dadas sao maiores que o dia, mes e hora de hoje.
+        }
+      },
+      include: {
+        service: {//incluindo serviços e barbearias ligadas.
+          include: {
+            barbershop: true
+          },
         },
       },
-    },
-    orderBy: {
-      date: 'asc'
-    }
-  })
+      orderBy: {
+        date: 'asc'
+      }
+    })
+  }
 
 
   const formattedDate = format(new Date(), "EE, d 'de' MMMM", { locale: ptBR });
@@ -91,7 +98,7 @@ const Home = async () => {
                 AGENDAMENTOS
               </h2>
 
-              {/* {ConfirmedBookings.length > 0 ? (
+              {ConfirmedBookings.length > 0 ? (
                 <div className="flex overflow-x-auto gap-3 [&::-webkit-scrollbar]:hidden">
                   {ConfirmedBookings.map(booking => <BookingItem key={booking.id} booking={booking} />)}
                 </div>
@@ -101,10 +108,7 @@ const Home = async () => {
                   <div className="p-5">
                     <p className="text-sm text-gray-400">Não há agendamentos por enquanto...</p>
                   </div>
-                )} */}
-              <div className="flex overflow-x-auto gap-3 [&::-webkit-scrollbar]:hidden">
-                {ConfirmedBookings.map(booking => <BookingItem key={booking.id} booking={booking} />)}
-              </div>
+                )}
             </>
           )
         }
