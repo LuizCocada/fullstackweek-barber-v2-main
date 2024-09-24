@@ -82,7 +82,7 @@ const BarbershopPage = async ({ params }: BarbershopPageProps) => {
             <div className="p-5 space-y-3 border-b border-solid">
                 <h2 className="uppercase font-bold text-gray-400">Serviços</h2>
                 <div className="space-y-3">
-                    {barbershop.services.map(service => <ServiceItem key={service.id} service={JSON.parse(JSON.stringify(service))} barbershop={barbershop}/>)} {/* JSON para evitar error de DECIMAL */}
+                    {barbershop.services.map(service => <ServiceItem key={service.id} service={JSON.parse(JSON.stringify(service))} barbershop={JSON.parse(JSON.stringify(barbershop))}/>)} {/*JSON para evitar error de DECIMAL */}
                 </div>
             </div>
 
