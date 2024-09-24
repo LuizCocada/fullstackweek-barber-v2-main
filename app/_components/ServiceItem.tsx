@@ -7,7 +7,7 @@ import { Card, CardContent } from "./ui/card"
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "./ui/sheet"
 import { Calendar } from "./ui/calendar"
 import { ptBR } from "date-fns/locale"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { format, set } from "date-fns"
 import { createBooking } from "../_actions/create-booking"
 import { useSession } from "next-auth/react"
@@ -15,6 +15,7 @@ import { toast } from "sonner"
 import { GetBookings } from "../_actions/get-bookking"
 import { Dialog, DialogContent } from "./ui/dialog"
 import LoginDialogContent from "./LoginDialogContent"
+import BookingSummary from "./BookingSummary"
 
 
 interface ServiceItemProps {
@@ -113,28 +114,26 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
         }
         );
 
+    const selectedDate = useMemo(() => {
+        if (!selectedDay || !selectedTime) return
+        return set(selectedDay, {
+            hours: Number(selectedTime?.split(":")[0]),
+            minutes: Number(selectedTime?.split(":")[1]),
+        })
+    }, [selectedDay, selectedTime]) //para evitar repeticao de codigo, toda vez que selectDay ou selectTime mudar ele atualiza selectDay com a hora selecionada
+
+
+
     const handleCreateBooking = async () => {
         try {
+            if (!selectedDate) return
 
-            if (!selectedDay || !selectedTime) return
-
-            //precisamos fazer isso pois inicialmente o selectedDay nao retorna a hora => Tue Sep 24 2024 00:00:00 GMT-0300 (Horário Padrão de Brasília) 
-            //necessitando assim, combinar a hora selecionada à o dia selecionado.
-            const hour = Number(selectedTime.split(":")[0])
-            const minute = Number(selectedTime.split(":")[1])
-            //ex: [09 : 00]
-
-            const newDate = set(selectedDay, {
-                minutes: minute,
-                hours: hour
-            })
-            //newDate => passando horas e minutos para o dia selecionado
-
+            selectedDate //retorna o dia selecionado e seta o horario escolhido.
 
             await createBooking({
                 userId: (data?.user as any).id,
                 serviceId: service.id,
-                date: newDate,
+                date: selectedDate,
             })
 
             toast.success("Reserva criada com sucesso!")
@@ -214,8 +213,8 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                                     {/* map em banco de horario disponiveis e desabilita os horarios já registrados. */}
                                     {selectedDay && (
                                         <div className="flex gap-1.5 border-b border-solid py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-                                             {filterTimeListValidhour.length > 0 ? (
-                                             filterTimeListValidhour.map((time) => //listTimeString filtrando do array timeList apenas as datas que estao no futuro.
+                                            {filterTimeListValidhour.length > 0 ? (
+                                                filterTimeListValidhour.map((time) => //listTimeString filtrando do array timeList apenas as datas que estao no futuro.
                                                     <Button key={time} className="rounded-full"
                                                         size={"sm"}
                                                         variant={selectedTime == time ? "default" : "outline"}
@@ -232,47 +231,13 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                                     )}
 
                                     {/* Só rederiza caso tiver 'selectedTime' e tambem verifica se selectedDay nao é nulo para nao ocorrer conflito na formataçao date-fns*/}
-                                    {selectedTime && selectedDay && (
+                                    {selectedDate && (
                                         <div className="py-5 space-y-10">
                                             {/* RESUMO */}
-                                            <Card className="rounded-xl">
-                                                <CardContent className="p-3 space-y-2">
-                                                    <div className="flex items-center justify-between">
-                                                        <h2 className="font-bold">{service.name}</h2>
-                                                        <p className="text-sm font-bold">
-                                                            {Intl.NumberFormat("pt-BR", {
-                                                                style: "currency",
-                                                                currency: "BRL",
-                                                            }).format(Number(service.price))}
-                                                        </p>
-                                                    </div>
-
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="text-sm text-gray-400">Data</p>
-                                                        {/* usando date-fns */}
-                                                        <p className="text-sm">
-                                                            {format(selectedDay, "d 'de' MMMM", {
-                                                                locale: ptBR,
-                                                            })}
-                                                        </p>
-                                                    </div>
-
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="text-sm text-gray-400">Horário</p>
-                                                        <p className="text-sm ">
-                                                            {selectedTime}
-                                                        </p>
-                                                    </div>
-
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="text-sm text-gray-400">Barbearia</p>
-                                                        {/* usando date-fns */}
-                                                        <p className="text-sm ">
-                                                            {barbershop.name}
-                                                        </p>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
+                                            <BookingSummary barbershop={barbershop}
+                                                service={service}
+                                                selectedDate={selectedDate}
+                                            />
                                         </div>
                                     )}
                                     <SheetFooter>

@@ -100,7 +100,7 @@ const Home = async () => {
 
               {ConfirmedBookings.length > 0 ? (
                 <div className="flex overflow-x-auto gap-3 [&::-webkit-scrollbar]:hidden">
-                  {ConfirmedBookings.map(booking => <BookingItem key={booking.id} booking={booking} />)}
+                  {ConfirmedBookings.map(booking => <BookingItem key={booking.id} booking={JSON.parse(JSON.stringify(booking))} />)}  {/*JSON para evitar error de DECIMAL */}
                 </div>
               )
                 :
