@@ -16,6 +16,7 @@ import { GetBookings } from "../_actions/get-bookking"
 import { Dialog, DialogContent } from "./ui/dialog"
 import LoginDialogContent from "./LoginDialogContent"
 import BookingSummary from "./BookingSummary"
+import { useRouter } from "next/navigation"
 
 
 interface ServiceItemProps {
@@ -26,6 +27,8 @@ interface ServiceItemProps {
 const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
 
     const { data } = useSession()//usuario logado. //gerenciar em pasta api'
+
+    const router = useRouter()
 
     const [signInDialogItsOpen, setSignInDialogItsOpen] = useState(false)
     const handleVeridyUserLoggedIn = () => {
@@ -136,7 +139,12 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                 date: selectedDate,
             })
 
-            toast.success("Reserva criada com sucesso!")
+            toast.success("Reserva criada com sucesso!" , {
+                action: {
+                    label: "Ver agendamentos",
+                    onClick: () => router.push("/bookings")
+                }
+            })
         } catch (error) {
             console.log(error)
             toast.error("Error ao criar reserva")
